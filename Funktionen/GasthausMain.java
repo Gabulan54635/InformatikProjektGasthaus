@@ -8,7 +8,7 @@ public class GasthausMain {
 
     public static void main(String[] args) {
         try {
-            GasthausAufbau.buildConnection();
+            GasthausConnection.buildConnection();
 
             while (true) {
                 showMenu();
@@ -56,7 +56,7 @@ public class GasthausMain {
             System.out.println("Fehler beim Starten des Programms:");
             e.printStackTrace();
         } finally {
-            GasthausAufbau.closeConnection();
+            GasthausConnection.closeConnection();
             sc.close();
         }
     }

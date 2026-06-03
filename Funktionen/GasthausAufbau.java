@@ -24,41 +24,17 @@ public class GasthausAufbau {
     private static Dao<Mitarbeiter, Integer> mitarbeiterDao;
     private static Dao<Tisch, Integer> tischDao;
     private static Dao<Bestellung, Integer> bestellungDao;
+    
+    static void setupDatabase() throws SQLException {
+        menuekarteDao = DaoManager.createDao(GasthausConnection.connectionSource, Menuekarte.class);
+        mitarbeiterDao = DaoManager.createDao(GasthausConnection.connectionSource, Mitarbeiter.class);
+        tischDao = DaoManager.createDao(GasthausConnection.connectionSource, Tisch.class);
+        bestellungDao = DaoManager.createDao(GasthausConnection.connectionSource, Bestellung.class);
 
-    private static ConnectionSource connectionSource;
-    private static final Path DATABASE_DIRECTORY = Paths.get("daten");
-    private static final Path DATABASE_FILE = DATABASE_DIRECTORY.resolve("gasthausdb");
-
-    private static void setupDatabase() throws SQLException {
-        menuekarteDao = DaoManager.createDao(connectionSource, Menuekarte.class);
-        mitarbeiterDao = DaoManager.createDao(connectionSource, Mitarbeiter.class);
-        tischDao = DaoManager.createDao(connectionSource, Tisch.class);
-        bestellungDao = DaoManager.createDao(connectionSource, Bestellung.class);
-
-        TableUtils.createTableIfNotExists(connectionSource, Menuekarte.class);
-        TableUtils.createTableIfNotExists(connectionSource, Mitarbeiter.class);
-        TableUtils.createTableIfNotExists(connectionSource, Tisch.class);
-        TableUtils.createTableIfNotExists(connectionSource, Bestellung.class);
-    }
-
-    public static void buildConnection() throws Exception {
-        Files.createDirectories(DATABASE_DIRECTORY);
-
-        String databaseUrl = "jdbc:h2:" + DATABASE_FILE.toAbsolutePath().toString().replace('\\', '/');
-        connectionSource = new JdbcConnectionSource(databaseUrl);
-        setupDatabase();
-
-        System.out.println("Datenbank verbunden: " + DATABASE_FILE.toAbsolutePath() + ".mv.db");
-    }
-
-    public static void closeConnection() {
-        if (connectionSource != null) {
-            try {
-                connectionSource.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        TableUtils.createTableIfNotExists(GasthausConnection.connectionSource, Menuekarte.class);
+        TableUtils.createTableIfNotExists(GasthausConnection.connectionSource, Mitarbeiter.class);
+        TableUtils.createTableIfNotExists(GasthausConnection.connectionSource, Tisch.class);
+        TableUtils.createTableIfNotExists(GasthausConnection.connectionSource, Bestellung.class);
     }
 
     public static void gerichtHinzufuegen() {

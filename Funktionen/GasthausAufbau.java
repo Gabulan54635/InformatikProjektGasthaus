@@ -14,6 +14,7 @@ import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 
+import Tabellen.Bestellposition;
 import Tabellen.Bestellung;
 import Tabellen.Menuekarte;
 import Tabellen.Mitarbeiter;
@@ -24,17 +25,44 @@ public class GasthausAufbau {
     private static Dao<Mitarbeiter, Integer> mitarbeiterDao;
     private static Dao<Tisch, Integer> tischDao;
     private static Dao<Bestellung, Integer> bestellungDao;
-    
-    static void setupDatabase() throws SQLException {
-        menuekarteDao = DaoManager.createDao(GasthausConnection.connectionSource, Menuekarte.class);
-        mitarbeiterDao = DaoManager.createDao(GasthausConnection.connectionSource, Mitarbeiter.class);
-        tischDao = DaoManager.createDao(GasthausConnection.connectionSource, Tisch.class);
-        bestellungDao = DaoManager.createDao(GasthausConnection.connectionSource, Bestellung.class);
+    private static Dao<Bestellposition, Integer> bestellpositionDao;
 
-        TableUtils.createTableIfNotExists(GasthausConnection.connectionSource, Menuekarte.class);
-        TableUtils.createTableIfNotExists(GasthausConnection.connectionSource, Mitarbeiter.class);
-        TableUtils.createTableIfNotExists(GasthausConnection.connectionSource, Tisch.class);
-        TableUtils.createTableIfNotExists(GasthausConnection.connectionSource, Bestellung.class);
+    private static ConnectionSource connectionSource;
+    private static final Path DATABASE_DIRECTORY = Paths.get("daten");
+    private static final Path DATABASE_FILE = DATABASE_DIRECTORY.resolve("gasthausdb");
+
+    private static void setupDatabase() throws SQLException {
+        menuekarteDao = DaoManager.createDao(connectionSource, Menuekarte.class);
+        mitarbeiterDao = DaoManager.createDao(connectionSource, Mitarbeiter.class);
+        tischDao = DaoManager.createDao(connectionSource, Tisch.class);
+        bestellungDao = DaoManager.createDao(connectionSource, Bestellung.class);
+        bestellpositionDao = DaoManager.createDao(connectionSource, Bestellposition.class);
+
+        TableUtils.createTableIfNotExists(connectionSource, Menuekarte.class);
+        TableUtils.createTableIfNotExists(connectionSource, Mitarbeiter.class);
+        TableUtils.createTableIfNotExists(connectionSource, Tisch.class);
+        TableUtils.createTableIfNotExists(connectionSource, Bestellung.class);
+        TableUtils.createTableIfNotExists(connectionSource, Bestellposition.class);
+    }
+
+    public static void buildConnection() throws Exception {
+        Files.createDirectories(DATABASE_DIRECTORY);
+
+        String databaseUrl = "jdbc:h2:" + DATABASE_FILE.toAbsolutePath().toString().replace('\\', '/');
+        connectionSource = new JdbcConnectionSource(databaseUrl);
+        setupDatabase();
+
+        System.out.println("Datenbank verbunden: " + DATABASE_FILE.toAbsolutePath() + ".mv.db");
+    }
+
+    public static void closeConnection() {
+        if (connectionSource != null) {
+            try {
+                connectionSource.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public static void gerichtHinzufuegen() {
@@ -139,11 +167,32 @@ public class GasthausAufbau {
         }
     }
 
-    public static void bestellungAnlegen() {
+    public static void bestellungBasisAnlegen() {
         try {
-        	
-        } catch(Exception e) {
-        	
+            List<Tisch> tische = tischDao.queryForAll();
+            List<Mitarbeiter> mitarbeiterListe = mitarbeiterDao.queryForAll();
+
+            if (tische.isEmpty()) {
+                System.out.println("Es gibt noch keinen Tisch. Lege zuerst einen Tisch an.");
+                return;
+            }
+
+            if (mitarbeiterListe.isEmpty()) {
+                System.out.println("Es gibt noch keinen Koch. Lege zuerst einen Mitarbeiter an.");
+                return;
+            }
+
+            System.out.println("Basis-Bestellung wird mit dem ersten Tisch und dem ersten Koch angelegt.");
+            Tisch tisch = tische.get(0);
+            Mitarbeiter mitarbeiter = mitarbeiterListe.get(0);
+
+            Bestellung bestellung = new Bestellung(tisch, mitarbeiter, Date.valueOf(LocalDate.now()), "offen");
+            bestellungDao.create(bestellung);
+
+            System.out.println("Bestellung erfolgreich angelegt. Später können dazu Bestellpositionen mit Gericht und Anzahl gespeichert werden.");
+        } catch (SQLException e) {
+            System.out.println("Fehler beim Anlegen der Bestellung:");
+            e.printStackTrace();
         }
     }
 
@@ -213,9 +262,23 @@ public class GasthausAufbau {
 
     public static void bestellungenAnsehen() {
         try {
-            
-        } catch (Exception e) {
-        	
+            List<Bestellung> bestellungen = bestellungDao.queryForAll();
+            if (bestellungen.isEmpty()) {
+                System.out.println("Keine Bestellungen vorhanden.");
+                return;
+            }
+
+            System.out.println("\n--- Bestellungen ---");
+            for (Bestellung b : bestellungen) {
+                System.out.println("ID: " + b.getBestellung_id()
+                        + ", Tisch: " + b.getTisch().getTisch_nummer()
+                        + ", Mitarbeiter: " + b.getMitarbeiter().getName()
+                        + ", Datum: " + b.getDatum()
+                        + ", Status: " + b.getStatus());
+            }
+        } catch (SQLException e) {
+            System.out.println("Fehler beim Anzeigen der Bestellungen:");
+            e.printStackTrace();
         }
     }
 }

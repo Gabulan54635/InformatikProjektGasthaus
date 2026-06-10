@@ -8,7 +8,7 @@ public class GasthausMain {
 
     public static void main(String[] args) {
         try {
-            GasthausConnection.buildConnection();
+            GasthausAufbau.buildConnection();
 
             while (true) {
                 showMenu();
@@ -31,7 +31,7 @@ public class GasthausMain {
                     GasthausAufbau.mitarbeiterHinzufuegen();
                     break;
                 case 6:
-                    GasthausAufbau.bestellungAnlegen();
+                    GasthausAufbau.bestellungBasisAnlegen();
                     break;
                 case 7:
                     GasthausAufbau.gerichteAnsehen();
@@ -56,7 +56,7 @@ public class GasthausMain {
             System.out.println("Fehler beim Starten des Programms:");
             e.printStackTrace();
         } finally {
-            GasthausConnection.closeConnection();
+            GasthausAufbau.closeConnection();
             sc.close();
         }
     }
@@ -68,7 +68,7 @@ public class GasthausMain {
         System.out.println("3) Gericht bearbeiten");
         System.out.println("4) Tisch hinzufügen");
         System.out.println("5) Mitarbeiter hinzufügen (nur Koch)");
-        System.out.println("6) Bestellung anlegen");
+        System.out.println("6) Bestellung Basis anlegen");
         System.out.println("7) Gerichte ansehen");
         System.out.println("8) Tische ansehen");
         System.out.println("9) Mitarbeiter ansehen");

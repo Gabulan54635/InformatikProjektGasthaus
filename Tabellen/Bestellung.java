@@ -10,10 +10,10 @@ public class Bestellung {
     @DatabaseField(generatedId = true)
     private Integer bestellung_id;
 
-    @DatabaseField(canBeNull = false, foreign = true)
+    @DatabaseField(canBeNull = false, foreign = true, foreignAutoRefresh = true)
     private Tisch tisch;
 
-    @DatabaseField(canBeNull = false, foreign = true)
+    @DatabaseField(canBeNull = false, foreign = true, foreignAutoRefresh = true)
     private Mitarbeiter mitarbeiter;
 
     @DatabaseField(canBeNull = false)

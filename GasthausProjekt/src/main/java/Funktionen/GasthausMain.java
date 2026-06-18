@@ -98,7 +98,7 @@ public class GasthausMain {
 
         String input = sc.nextLine();
 
-        if (input.isBlank()) {
+        if (input.trim().isEmpty()) {
             return standardWert;
         }
 
@@ -110,7 +110,7 @@ public class GasthausMain {
             System.out.print(prompt);
             String input = sc.nextLine();
 
-            if (input.isBlank()) {
+            if (input.trim().isEmpty()) {
                 return standardWert;
             }
 
@@ -126,7 +126,7 @@ public class GasthausMain {
         while (true) {
             System.out.print(prompt);
             String input = sc.nextLine();
-            if (input.isBlank()) {
+            if (input.trim().isEmpty()) {
                 return null;
             }
             try {
